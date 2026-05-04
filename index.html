@@ -9,48 +9,20 @@
   <!-- 引入 FontAwesome 圖示庫 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* 自訂過渡動畫 */
     .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
-    /* 隱藏元素用 */
-    .hidden-panel { display: none; }
   </style>
 </head>
 <body class="bg-slate-50 font-sans pb-10 text-slate-800">
 
   <!-- 標題列 -->
   <header class="bg-blue-600 text-white shadow-md sticky top-0 z-10">
-    <div class="max-w-md mx-auto px-4 py-4 flex justify-between items-center">
+    <div class="max-w-md mx-auto px-4 py-4 flex justify-center items-center">
       <h1 class="text-xl font-bold">歐洲行程輸入器 ✈️</h1>
-      <button id="toggleSettingsBtn" class="p-2 bg-blue-700/50 rounded-full hover:bg-blue-700 transition-all">
-        <i class="fa-solid fa-gear w-5 h-5 flex items-center justify-center"></i>
-      </button>
     </div>
   </header>
 
   <main class="max-w-md mx-auto px-4 mt-6 space-y-6">
     
-    <!-- URL 設定區塊 -->
-    <div id="settingsPanel" class="hidden-panel bg-yellow-50 border border-yellow-200 rounded-xl p-5 shadow-sm">
-      <h2 class="font-bold text-yellow-800 mb-2 flex items-center gap-2">
-        <i class="fa-solid fa-circle-exclamation"></i> 系統連線設定
-      </h2>
-      <p class="text-sm text-yellow-700 mb-4 leading-relaxed">
-        請貼上你的 <strong>Google Apps Script 網頁應用程式網址</strong>，這樣輸入的資料才會傳送到你的試算表喔！
-      </p>
-      <input
-        type="url"
-        id="gasUrlInput"
-        placeholder="https://script.google.com/macros/s/..."
-        class="w-full px-3 py-2 border border-yellow-300 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-      />
-      <button
-        id="saveUrlBtn"
-        class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 rounded-lg transition-all"
-      >
-        儲存設定
-      </button>
-    </div>
-
     <!-- 主要輸入表單 -->
     <form id="tripForm" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-6">
       
@@ -134,21 +106,21 @@
   </main>
 
   <script>
+    // =========================================================================
+    // 💡 這裡已經幫你填好你的 Google Apps Script 網址囉！
+    // =========================================================================
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzEf5Mc_olMRl4Thd2Sox92XVL08E-vCME5T63FRIP1qr5ihH0Jbb2aI5G6RN7DNYRh/exec";
+    // =========================================================================
+
     document.addEventListener('DOMContentLoaded', () => {
       // 狀態變數
       let state = {
         identity: 'Liang',
         country: '捷克',
-        category: '想去的地方',
-        gasUrl: ''
+        category: '想去的地方'
       };
 
       // DOM 元素
-      const toggleSettingsBtn = document.getElementById('toggleSettingsBtn');
-      const settingsPanel = document.getElementById('settingsPanel');
-      const gasUrlInput = document.getElementById('gasUrlInput');
-      const saveUrlBtn = document.getElementById('saveUrlBtn');
-      
       const identityBtns = document.querySelectorAll('.identity-btn');
       const countrySelect = document.getElementById('countrySelect');
       const categoryBtns = document.querySelectorAll('.category-btn');
@@ -159,19 +131,10 @@
       const submitIcon = document.getElementById('submitIcon');
       const submitText = document.getElementById('submitText');
 
-      // 初始化：讀取 localStorage
-      const savedUrl = localStorage.getItem('euro_trip_gas_url');
-      if (savedUrl) {
-        state.gasUrl = savedUrl;
-        gasUrlInput.value = savedUrl;
-      } else {
-        settingsPanel.classList.remove('hidden-panel');
-      }
-
       // 檢查輸入是否有效以啟用按鈕
       const checkFormValidity = () => {
         const text = itemInput.value.trim();
-        if (text.length > 0 && state.gasUrl) {
+        if (text.length > 0) {
           submitBtn.classList.remove('bg-slate-300', 'cursor-not-allowed', 'pointer-events-none');
           submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'active:scale-95');
         } else {
@@ -180,26 +143,10 @@
         }
       };
 
-      // 設定面板開關
-      toggleSettingsBtn.addEventListener('click', () => {
-        settingsPanel.classList.toggle('hidden-panel');
-      });
-
-      // 儲存 URL
-      saveUrlBtn.addEventListener('click', () => {
-        const url = gasUrlInput.value.trim();
-        state.gasUrl = url;
-        localStorage.setItem('euro_trip_gas_url', url);
-        settingsPanel.classList.add('hidden-panel');
-        checkFormValidity();
-      });
-
       // 選擇身份
       identityBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
-          const val = e.currentTarget.dataset.value;
-          state.identity = val;
-          // 更新樣式
+          state.identity = e.currentTarget.dataset.value;
           identityBtns.forEach(b => {
             b.classList.remove('border-blue-500', 'bg-blue-50', 'text-blue-700');
             b.classList.add('border-slate-100', 'bg-slate-50', 'text-slate-500');
@@ -217,9 +164,7 @@
       // 選擇類別
       categoryBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
-          const val = e.currentTarget.dataset.value;
-          state.category = val;
-          // 更新樣式
+          state.category = e.currentTarget.dataset.value;
           categoryBtns.forEach(b => {
             b.classList.remove('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
             b.classList.add('border-slate-100', 'bg-slate-50', 'text-slate-500');
@@ -237,26 +182,23 @@
         e.preventDefault();
         const text = itemInput.value.trim();
         
-        if (!text || !state.gasUrl) {
-          settingsPanel.classList.remove('hidden-panel');
-          return;
-        }
+        if (!text) return;
 
         // 顯示載入中狀態
         submitBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'active:scale-95');
-        submitBtn.classList.add('bg-blue-500', 'cursor-wait');
+        submitBtn.classList.add('bg-blue-500', 'cursor-wait', 'pointer-events-none');
         submitIcon.className = 'fa-solid fa-spinner fa-spin';
         submitText.textContent = '傳送中...';
 
         try {
           // 組合 URL
-          const submitUrl = new URL(state.gasUrl);
+          const submitUrl = new URL(GAS_URL);
           submitUrl.searchParams.append('identity', state.identity);
           submitUrl.searchParams.append('country', state.country);
           submitUrl.searchParams.append('category', state.category);
           submitUrl.searchParams.append('item', text);
 
-          // 發送請求 (no-cors 模式)
+          // 發送請求 (no-cors 模式解決跨網域問題)
           await fetch(submitUrl.toString(), {
             method: 'GET',
             mode: 'no-cors'
@@ -269,17 +211,11 @@
           submitText.textContent = '已成功加入試算表！';
           
           itemInput.value = ''; // 清空輸入框
-          checkFormValidity();
-
+          
           // 3秒後恢復
           setTimeout(() => {
-            if(itemInput.value.trim() === '') {
-              submitBtn.classList.remove('bg-green-500');
-              submitBtn.classList.add('bg-slate-300', 'cursor-not-allowed', 'pointer-events-none');
-            } else {
-               submitBtn.classList.remove('bg-green-500');
-               submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'active:scale-95');
-            }
+            submitBtn.classList.remove('pointer-events-none', 'bg-green-500');
+            checkFormValidity();
             submitIcon.className = 'fa-solid fa-paper-plane';
             submitText.textContent = '發送到試算表';
           }, 3000);
@@ -293,8 +229,8 @@
           submitText.textContent = '傳送失敗，請重試';
 
           setTimeout(() => {
-            submitBtn.classList.remove('bg-red-500');
-            submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'active:scale-95');
+            submitBtn.classList.remove('pointer-events-none', 'bg-red-500');
+            checkFormValidity();
             submitIcon.className = 'fa-solid fa-paper-plane';
             submitText.textContent = '發送到試算表';
           }, 3000);
