@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>歐洲行程輸入神器 ✈️</title>
+  <!-- 引入 Tailwind CSS 作為樣式框架 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 引入 FontAwesome 圖示庫 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* 自訂過渡動畫 */
+    .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+    /* 隱藏元素用 */
+    .hidden-panel { display: none; }
+  </style>
+</head>
+<body class="bg-slate-50 font-sans pb-10 text-slate-800">
+
+  <!-- 標題列 -->
+  <header class="bg-blue-600 text-white shadow-md sticky top-0 z-10">
+    <div class="max-w-md mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold">歐洲行程輸入器 ✈️</h1>
+      <button id="toggleSettingsBtn" class="p-2 bg-blue-700/50 rounded-full hover:bg-blue-700 transition-all">
+        <i class="fa-solid fa-gear w-5 h-5 flex items-center justify-center"></i>
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-md mx-auto px-4 mt-6 space-y-6">
+    
+    <!-- URL 設定區塊 -->
+    <div id="settingsPanel" class="hidden-panel bg-yellow-50 border border-yellow-200 rounded-xl p-5 shadow-sm">
+      <h2 class="font-bold text-yellow-800 mb-2 flex items-center gap-2">
+        <i class="fa-solid fa-circle-exclamation"></i> 系統連線設定
+      </h2>
+      <p class="text-sm text-yellow-700 mb-4 leading-relaxed">
+        請貼上你的 <strong>Google Apps Script 網頁應用程式網址</strong>，這樣輸入的資料才會傳送到你的試算表喔！
+      </p>
+      <input
+        type="url"
+        id="gasUrlInput"
+        placeholder="https://script.google.com/macros/s/..."
+        class="w-full px-3 py-2 border border-yellow-300 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+      />
+      <button
+        id="saveUrlBtn"
+        class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 rounded-lg transition-all"
+      >
+        儲存設定
+      </button>
+    </div>
+
+    <!-- 主要輸入表單 -->
+    <form id="tripForm" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-6">
+      
+      <!-- 1. 選擇身份 -->
+      <div>
+        <label class="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-3">
+          <i class="fa-solid fa-user text-blue-500"></i> 你是誰？
+        </label>
+        <div class="grid grid-cols-2 gap-3" id="identityGroup">
+          <button type="button" data-value="Liang" class="identity-btn py-3 rounded-xl font-medium border-2 border-blue-500 bg-blue-50 text-blue-700 transition-all">
+            🙋‍♂️ Liang
+          </button>
+          <button type="button" data-value="Tsai" class="identity-btn py-3 rounded-xl font-medium border-2 border-slate-100 bg-slate-50 text-slate-500 hover:bg-slate-100 transition-all">
+            🙋‍♂️ Tsai
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. 選擇國家 -->
+      <div>
+        <label class="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-3">
+          <i class="fa-solid fa-location-dot text-blue-500"></i> 加入到哪個國家？
+        </label>
+        <div class="relative">
+          <select id="countrySelect" class="w-full bg-slate-50 border-2 border-slate-100 text-slate-700 py-3 px-4 rounded-xl font-medium focus:outline-none focus:border-blue-500 focus:bg-white transition-all appearance-none">
+            <option value="捷克">🇨🇿 捷克</option>
+            <option value="荷蘭">🇳🇱 荷蘭</option>
+            <option value="法國">🇫🇷 法國</option>
+            <option value="英國">🇬🇧 英國</option>
+            <option value="西班牙">🇪🇸 西班牙</option>
+            <option value="義大利">🇮🇹 義大利</option>
+            <option value="奧地利">🇦🇹 奧地利</option>
+            <option value="匈牙利">🇭🇺 匈牙利</option>
+          </select>
+          <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+        </div>
+      </div>
+
+      <!-- 3. 選擇類別 -->
+      <div>
+        <label class="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-3">
+          <i class="fa-solid fa-tag text-blue-500"></i> 這是什麼類別？
+        </label>
+        <div class="grid grid-cols-3 gap-2" id="categoryGroup">
+          <button type="button" data-value="想去的地方" class="category-btn py-2 px-1 text-sm rounded-lg font-medium border-2 border-indigo-500 bg-indigo-50 text-indigo-700 transition-all">
+            🗺️ 景點
+          </button>
+          <button type="button" data-value="想吃的東西" class="category-btn py-2 px-1 text-sm rounded-lg font-medium border-2 border-slate-100 bg-slate-50 text-slate-500 hover:bg-slate-100 transition-all">
+            🍜 美食
+          </button>
+          <button type="button" data-value="想做的事" class="category-btn py-2 px-1 text-sm rounded-lg font-medium border-2 border-slate-100 bg-slate-50 text-slate-500 hover:bg-slate-100 transition-all">
+            🎯 體驗
+          </button>
+        </div>
+      </div>
+
+      <!-- 4. 輸入內容 -->
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-2">
+          寫下你想去的景點或美食：
+        </label>
+        <textarea
+          id="itemInput"
+          placeholder="例如：羅浮宮、吃海鮮燉飯..."
+          rows="3"
+          class="w-full bg-slate-50 border-2 border-slate-100 text-slate-800 py-3 px-4 rounded-xl focus:outline-none focus:border-blue-500 focus:bg-white transition-all resize-none"
+        ></textarea>
+      </div>
+
+      <!-- 5. 提交按鈕 -->
+      <button
+        type="submit"
+        id="submitBtn"
+        class="w-full py-4 rounded-xl font-bold text-white flex justify-center items-center gap-2 transition-all bg-slate-300 cursor-not-allowed pointer-events-none"
+      >
+        <i id="submitIcon" class="fa-solid fa-paper-plane"></i>
+        <span id="submitText">發送到試算表</span>
+      </button>
+
+    </form>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 狀態變數
+      let state = {
+        identity: 'Liang',
+        country: '捷克',
+        category: '想去的地方',
+        gasUrl: ''
+      };
+
+      // DOM 元素
+      const toggleSettingsBtn = document.getElementById('toggleSettingsBtn');
+      const settingsPanel = document.getElementById('settingsPanel');
+      const gasUrlInput = document.getElementById('gasUrlInput');
+      const saveUrlBtn = document.getElementById('saveUrlBtn');
+      
+      const identityBtns = document.querySelectorAll('.identity-btn');
+      const countrySelect = document.getElementById('countrySelect');
+      const categoryBtns = document.querySelectorAll('.category-btn');
+      const itemInput = document.getElementById('itemInput');
+      
+      const tripForm = document.getElementById('tripForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const submitIcon = document.getElementById('submitIcon');
+      const submitText = document.getElementById('submitText');
+
+      // 初始化：讀取 localStorage
+      const savedUrl = localStorage.getItem('euro_trip_gas_url');
+      if (savedUrl) {
+        state.gasUrl = savedUrl;
+        gasUrlInput.value = savedUrl;
+      } else {
+        settingsPanel.classList.remove('hidden-panel');
+      }
+
+      // 檢查輸入是否有效以啟用按鈕
+      const checkFormValidity = () => {
+        const text = itemInput.value.trim();
+        if (text.length > 0 && state.gasUrl) {
+          submitBtn.classList.remove('bg-slate-300', 'cursor-not-allowed', 'pointer-events-none');
+          submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'active:scale-95');
+        } else {
+          submitBtn.classList.add('bg-slate-300', 'cursor-not-allowed', 'pointer-events-none');
+          submitBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'active:scale-95');
+        }
+      };
+
+      // 設定面板開關
+      toggleSettingsBtn.addEventListener('click', () => {
+        settingsPanel.classList.toggle('hidden-panel');
+      });
+
+      // 儲存 URL
+      saveUrlBtn.addEventListener('click', () => {
+        const url = gasUrlInput.value.trim();
+        state.gasUrl = url;
+        localStorage.setItem('euro_trip_gas_url', url);
+        settingsPanel.classList.add('hidden-panel');
+        checkFormValidity();
+      });
+
+      // 選擇身份
+      identityBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const val = e.currentTarget.dataset.value;
+          state.identity = val;
+          // 更新樣式
+          identityBtns.forEach(b => {
+            b.classList.remove('border-blue-500', 'bg-blue-50', 'text-blue-700');
+            b.classList.add('border-slate-100', 'bg-slate-50', 'text-slate-500');
+          });
+          e.currentTarget.classList.remove('border-slate-100', 'bg-slate-50', 'text-slate-500');
+          e.currentTarget.classList.add('border-blue-500', 'bg-blue-50', 'text-blue-700');
+        });
+      });
+
+      // 選擇國家
+      countrySelect.addEventListener('change', (e) => {
+        state.country = e.target.value;
+      });
+
+      // 選擇類別
+      categoryBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const val = e.currentTarget.dataset.value;
+          state.category = val;
+          // 更新樣式
+          categoryBtns.forEach(b => {
+            b.classList.remove('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
+            b.classList.add('border-slate-100', 'bg-slate-50', 'text-slate-500');
+          });
+          e.currentTarget.classList.remove('border-slate-100', 'bg-slate-50', 'text-slate-500');
+          e.currentTarget.classList.add('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
+        });
+      });
+
+      // 監聽輸入框
+      itemInput.addEventListener('input', checkFormValidity);
+
+      // 表單送出
+      tripForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const text = itemInput.value.trim();
+        
+        if (!text || !state.gasUrl) {
+          settingsPanel.classList.remove('hidden-panel');
+          return;
+        }
+
+        // 顯示載入中狀態
+        submitBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'active:scale-95');
+        submitBtn.classList.add('bg-blue-500', 'cursor-wait');
+        submitIcon.className = 'fa-solid fa-spinner fa-spin';
+        submitText.textContent = '傳送中...';
+
+        try {
+          // 組合 URL
+          const submitUrl = new URL(state.gasUrl);
+          submitUrl.searchParams.append('identity', state.identity);
+          submitUrl.searchParams.append('country', state.country);
+          submitUrl.searchParams.append('category', state.category);
+          submitUrl.searchParams.append('item', text);
+
+          // 發送請求 (no-cors 模式)
+          await fetch(submitUrl.toString(), {
+            method: 'GET',
+            mode: 'no-cors'
+          });
+
+          // 成功狀態
+          submitBtn.classList.remove('bg-blue-500', 'cursor-wait');
+          submitBtn.classList.add('bg-green-500');
+          submitIcon.className = 'fa-solid fa-circle-check';
+          submitText.textContent = '已成功加入試算表！';
+          
+          itemInput.value = ''; // 清空輸入框
+          checkFormValidity();
+
+          // 3秒後恢復
+          setTimeout(() => {
+            if(itemInput.value.trim() === '') {
+              submitBtn.classList.remove('bg-green-500');
+              submitBtn.classList.add('bg-slate-300', 'cursor-not-allowed', 'pointer-events-none');
+            } else {
+               submitBtn.classList.remove('bg-green-500');
+               submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'active:scale-95');
+            }
+            submitIcon.className = 'fa-solid fa-paper-plane';
+            submitText.textContent = '發送到試算表';
+          }, 3000);
+
+        } catch (error) {
+          console.error('Error:', error);
+          // 錯誤狀態
+          submitBtn.classList.remove('bg-blue-500', 'cursor-wait');
+          submitBtn.classList.add('bg-red-500');
+          submitIcon.className = 'fa-solid fa-circle-exclamation';
+          submitText.textContent = '傳送失敗，請重試';
+
+          setTimeout(() => {
+            submitBtn.classList.remove('bg-red-500');
+            submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'active:scale-95');
+            submitIcon.className = 'fa-solid fa-paper-plane';
+            submitText.textContent = '發送到試算表';
+          }, 3000);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
